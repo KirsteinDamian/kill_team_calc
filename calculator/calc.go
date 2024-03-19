@@ -1,13 +1,13 @@
 package calculator
 
-func CalculateShootingAttacks(attacker Attacker, defender Defender) (map[uint8]uint64, int) {
-	var totalScenarios int
+import "math"
+
+func CalculateShootingAttacks(attacker Attacker, defender Defender) map[uint8]float64 {
 	attackerRolls := cartesianProduct(attacker.DiceCount)
 	standardDefenderRolls := cartesianProduct(defender.DiceCount)
 	APxDefenderRolls := GetAPxDefenderRolls(attacker, defender, standardDefenderRolls)
 	PxDefenderRolls := GetPxDefenderRolls(attacker, defender, standardDefenderRolls)
-
-	damageMap := make(map[uint8]uint64)
+	damageMap := make(map[uint8]float64)
 
 	for _, attRoll := range attackerRolls {
 		var isAnyDmg bool = false
@@ -22,28 +22,28 @@ func CalculateShootingAttacks(attacker Attacker, defender Defender) (map[uint8]u
 			}
 		}
 		scenarios := GetDefenderRolls(attacker, isAnyCrit, APxDefenderRolls, PxDefenderRolls)
-		scenariosCount := len(scenarios)
+		scenariosCount := float64(len(scenarios))
 		if isAnyDmg {
 			for _, defRoll := range scenarios {
 				var damage uint8 = CalcShootAttack(attacker, defender, attRoll, defRoll)
 				var counter, ok = damageMap[damage]
 				if ok {
-					damageMap[damage] = counter + 1
+					damageMap[damage] = counter + math.Pow(6, -(float64(len(defRoll))+float64(len(attRoll))))
 				} else {
-					damageMap[damage] = 1
+					damageMap[damage] = math.Pow(6, -(float64(len(defRoll)) + float64(len(attRoll))))
 				}
+				// fmt.Printf("Attack roll: %v, Def roll: %v, Dmg delt: %v, PxDefRolls: %v \n", attRoll, defRoll, damage, PxDefenderRolls)
 			}
 		} else {
 			var counter, ok = damageMap[0]
 			if ok {
-				damageMap[0] = counter + uint64(scenariosCount)
+				damageMap[0] = counter + scenariosCount*math.Pow(6, -(float64(len(scenarios[0]))+float64(len(attRoll))))
 			} else {
-				damageMap[0] = uint64(scenariosCount)
+				damageMap[0] = scenariosCount * math.Pow(6, -(float64(len(scenarios[0]))+float64(len(attRoll))))
 			}
 		}
-		totalScenarios += scenariosCount
 	}
-	return damageMap, totalScenarios
+	return damageMap
 }
 
 func CalcShootAttack(attacker Attacker, defdefender Defender, attackRoll []uint8, defenceRoll []uint8) uint8 {

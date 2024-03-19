@@ -10,11 +10,11 @@ import (
 func main() {
 	t0 := time.Now()
 	att := calculator.Attacker{
-		DiceCount: 3, Balistic: 3, Damage: calculator.Damage{Basic: 3, Critical: 4},
-		AbilitiesAttack: calculator.AbilitiesAttack{MWx: 0, APx: 0, Px: 1},
+		DiceCount: 6, Balistic: 3, Damage: calculator.Damage{Basic: 3, Critical: 7},
+		AbilitiesAttack: calculator.AbilitiesAttack{MWx: 0, APx: 1, Px: 2},
 	}
-	def := calculator.Defender{DiceCount: 3, Balistic: 2, Hp: 12}
-	damageMap, totalScenarios := calculator.CalculateShootingAttacks(att, def)
+	def := calculator.Defender{DiceCount: 3, Balistic: 3, Hp: 12}
+	damageMap := calculator.CalculateShootingAttacks(att, def)
 
 	damageValues := make([]uint8, 0, len(damageMap))
 	for i := range damageMap {
@@ -24,7 +24,7 @@ func main() {
 
 	damageProbability := make(map[uint8]float64)
 	for damage, count := range damageMap {
-		damageProbability[damage] = float64(count) / float64(totalScenarios)
+		damageProbability[damage] = float64(count) // / float64(totalScenarios)
 	}
 	var avgDamage float64 = 0
 	var killChance float64 = 0
@@ -39,7 +39,5 @@ func main() {
 	}
 	fmt.Printf("Avarage damage: %.2f\n", avgDamage)
 	fmt.Printf("Kill chance: %.2f%%\n", killChance*100)
-	// fmt.Printf("Time: %v\n", time.Since(t0))
-	fmt.Println(totalScenarios)
 	fmt.Printf("Time: %v\n", time.Since(t0))
 }
